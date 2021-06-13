@@ -30,6 +30,9 @@ void startCameraServer();
 #define deviceName "camIP"
 AntaresESP32HTTP antares(ACCESSKEY);
 
+String camerasIP = "none";
+int sequence = 0;
+
 void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
@@ -109,12 +112,18 @@ void setup() {
   startCameraServer();
   Serial.print("Camera Ready! Use 'http://");
   Serial.print(WiFi.localIP());
-  antares.add("IP", WiFi.localIP().toString());
+  camerasIP = WiFi.localIP().toString();
+  antares.add("IP", camerasIP);
+  antares.add("sequence", sequence);
   antares.send(projectName, deviceName);
   Serial.println("' to connect");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  delay(10000);
+  delay(300000);
+  sequence = sequence + 1;
+  antares.add("IP", camerasIP);
+  antares.add("sequence", sequence);
+  antares.send(projectName, deviceName);
 }
