@@ -11,6 +11,9 @@ Servo myservo;
 
 #define deviceMqttSub "esp32"
 #define deviceMqttPub "reedswitch"
+#define deviceMqttPub2 "esp32-status"
+
+int sequence = 0;
 
 int redLampPin = 25;
 int greenLampPin = 26; 
@@ -33,6 +36,7 @@ int prevReed = 2;
 TaskHandle_t toggleLEDHandler;
 TaskHandle_t toggleBuzzerHandler;
 TaskHandle_t toggleLockHandler;
+TaskHandle_t stayAliveHandler;
 
 AntaresESP32MQTT antares(ACCESSKEY);
 
@@ -108,6 +112,14 @@ void setup() {
     1,           /* priority of the task */
     &toggleLockHandler,      /* Task handle to keep track of created task */
     1);
+  xTaskCreatePinnedToCore(
+    stayAlive,   /* Task function. */
+    "Stay Alive",     /* name of task. */
+    2048,       /* Stack size of task */
+    NULL,        /* parameter of the task */
+    3,           /* priority of the task */
+    &stayAliveHandler,      /* Task handle to keep track of created task */
+    1);
 }
 
 void toggleLED(void * parameter){
@@ -164,6 +176,18 @@ void toggleLock(void * parameter){
 
     // Pause the task again for 500ms
     vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+}
+
+void stayAlive(void * parameter){
+  for(;;){ // infinite loop
+    Serial.println("[!] Adding stay alive status");
+    sequence = sequence + 1;
+    antares.add("sequence", sequence);
+    antares.publish(projectName, deviceMqttPub2);
+    
+    // Pause the task again for 500ms
+    vTaskDelay(50000 / portTICK_PERIOD_MS);
   }
 }
 
