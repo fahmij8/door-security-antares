@@ -73,11 +73,10 @@ const setupVideos = async () => {
 
     let showVideo = () => {
         let state = $(".monitor-begin").data();
-        console.log(state);
         clearInterval(myTimer);
         myTimer = setInterval(() => {
             error_handle();
-        }, 6000);
+        }, 200);
         ShowImage.src = streamUrl + "/capture?_cb=" + Math.random();
     };
 
@@ -87,7 +86,7 @@ const setupVideos = async () => {
         if (restartCount <= 2) {
             myTimer = setInterval(() => {
                 showVideo();
-            }, 4000);
+            }, 200);
         } else {
             console.error("Showing video error");
         }
@@ -121,15 +120,15 @@ const setupVideos = async () => {
         const detections = await faceapi.detectAllFaces(canvas).withFaceLandmarks().withFaceDescriptors();
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         const results = resizedDetections.map((d) => faceMatcher.findBestMatch(d.descriptor));
-        results.forEach(async (result, i) => {
+        results.forEach((result, i) => {
             let box = resizedDetections[i].detection.box;
             if (result["_label"] === "unknown") {
                 let drawBox = new faceapi.draw.DrawBox(box, { label: "Intruder", boxColor: "red" });
                 drawBox.draw(canvas);
                 let images = canvas.toDataURL("image/png", 0.5);
-                await getData(1).then(async (result) => {
+                getData(1).then((result) => {
                     let state = [1, 1, 1, result.servo];
-                    await postData(state, 1);
+                    postData(state, 1);
                     updateDevice();
                     $(".fill-alerts").prepend(`
                         <a class="dropdown-item d-flex align-items-center nav-alert">
@@ -145,7 +144,7 @@ const setupVideos = async () => {
                         </a>
                         `);
                     $(".badge-counter").html($(".nav-alert").length);
-                    await firebase.database().ref(`record/${new Date().getTime()}`).set({
+                    firebase.database().ref(`record/${new Date().getTime()}`).set({
                         event: "Intruder Alert!",
                         picture: images,
                     });
