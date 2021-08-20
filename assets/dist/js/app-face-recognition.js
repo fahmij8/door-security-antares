@@ -2,6 +2,7 @@ import { getData, postData } from "./app-antares.js";
 import { Toast } from "./app-display.js";
 import { updateDevice } from "./app-device.js";
 import { routePage } from "./app-route.js";
+import { getUserInfo } from "./app-firebaseauth.js";
 
 const setupVideos = async () => {
     $(".stream-content").hide();
@@ -120,16 +121,16 @@ const setupVideos = async () => {
         const detections = await faceapi.detectAllFaces(canvas).withFaceLandmarks().withFaceDescriptors();
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         const results = resizedDetections.map((d) => faceMatcher.findBestMatch(d.descriptor));
-        results.forEach((result, i) => {
+        results.forEach(async (result, i) => {
             let box = resizedDetections[i].detection.box;
             if (result["_label"] === "unknown") {
                 let drawBox = new faceapi.draw.DrawBox(box, { label: "Intruder", boxColor: "red" });
                 drawBox.draw(canvas);
                 let images = canvas.toDataURL("image/png", 0.5);
-                getData(1).then((result) => {
+                await getData(1).then(async (result) => {
                     let state = [1, 1, 1, result.servo];
-                    postData(state, 1);
-                    updateDevice();
+                    await postData(state, 1);
+                    await updateDevice();
                     $(".fill-alerts").prepend(`
                         <a class="dropdown-item d-flex align-items-center nav-alert">
                             <div class="mr-3">
@@ -144,7 +145,11 @@ const setupVideos = async () => {
                         </a>
                         `);
                     $(".badge-counter").html($(".nav-alert").length);
-                    firebase.database().ref(`record/${new Date().getTime()}`).set({
+                    let uid;
+                    await getUserInfo().then((data) => {
+                        uid = data.uid;
+                    });
+                    firebase.database().ref(`users/${uid}/record/${new Date().getTime()}`).set({
                         event: "Intruder Alert!",
                         picture: images,
                     });

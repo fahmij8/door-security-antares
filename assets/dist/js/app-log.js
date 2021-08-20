@@ -1,9 +1,15 @@
-let fillLog = () => {
+import { getUserInfo } from "./app-firebaseauth.js";
+
+let fillLog = async () => {
+    let uid;
+    await getUserInfo().then((data) => {
+        uid = data.uid;
+    });
     $(".table-responsive").hide();
     let itemProcessed = 0;
-    firebase
+    await firebase
         .database()
-        .ref(`record`)
+        .ref(`users/${uid}/record`)
         .once("value", (snapshot) => {
             let dbJson = snapshot.val();
             if (dbJson === undefined || dbJson === null) {

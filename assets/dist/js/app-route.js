@@ -31,6 +31,21 @@ const loadPage = (page) => {
                     window.location.href = "./#dashboard";
                     routePage();
                 } else {
+                    let uid;
+                    await getUserInfo().then((data) => {
+                        uid = data.uid;
+                    });
+                    const dbRef = firebase.database().ref(`users/${uid}`);
+                    await dbRef
+                        .get()
+                        .then(async (snapshot) => {
+                            if (!snapshot.exists()) {
+                                await dbRef.set({ registered: "true" });
+                            }
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                        });
                     // Display corresponding page
                     await loadShell(html, "#fillContent");
                 }
