@@ -194,28 +194,27 @@ void stayAlive(void * parameter){
 void loop() {
   antares.checkMqttConnection();
   reedState = digitalRead(reedPin);
-  if(servoState == 0 && servoFinish == 1){
-    Serial.println("[!] Turning off Servo");
-    servoFinish = 0;
-    myservo.detach();
+  // Servo Mechanism
+  if(servoState == 0 && servoFinish == 0) {
     myservo.attach(servoOnePin);
-  } 
-
-  while(servoState == 1 && servoFinish == 0){
-    Serial.println("[!] Turning on Servo");
-    for(posServo = 0; posServo <= 180; posServo += 1){
-      myservo.write(posServo);
-      delay(5);
-      Serial.println(posServo);
-    }
     for(posServo = 180; posServo >= 0; posServo -= 1){
       myservo.write(posServo);
       delay(5);
       Serial.println(posServo);
     }
     servoFinish = 1;
+    myservo.detach();
+  } else if (servoState == 1 && servoFinish == 0){
+    myservo.attach(servoOnePin);
+    for(posServo = 0; posServo <= 180; posServo += 1){
+      myservo.write(posServo);
+      delay(5);
+      Serial.println(posServo);
+    }
+    servoFinish = 1;
+    myservo.detach();
   }
-  
+  // Reed switch mechanism
   if(prevReed == 2){
     prevReed = reedState;
     antares.add("reed", reedState);
