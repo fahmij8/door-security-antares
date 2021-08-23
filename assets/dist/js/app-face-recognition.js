@@ -3,6 +3,7 @@ import { Toast } from "./app-display.js";
 import { updateDevice } from "./app-device.js";
 import { routePage } from "./app-route.js";
 import { getUserInfo } from "./app-firebaseauth.js";
+import { showNotif } from "./app-sw-config.js";
 
 const setupVideos = async () => {
     $(".stream-content").hide();
@@ -153,6 +154,7 @@ const setupVideos = async () => {
                         event: "Intruder Alert!",
                         picture: images,
                     });
+                    showNotif();
                 });
             } else {
                 let drawBox = new faceapi.draw.DrawBox(box, { label: "Fahmi" });
