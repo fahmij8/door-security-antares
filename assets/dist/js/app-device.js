@@ -20,10 +20,10 @@ let updateDevice = async () => {
     });
     await getData(3).then((result) => {
         if (result.reed === 1) {
-            $(".dev-reed-status").html("Door Opened");
+            $(".dev-reed-status").html("Door Closed");
             $(".dev-reed-icon").removeClass("text-gray-300").addClass("text-success");
         } else {
-            $(".dev-reed-status").html("Door Closed");
+            $(".dev-reed-status").html("Door Opened");
             $(".dev-reed-icon").removeClass("text-success").addClass("text-gray-300");
         }
     });
